@@ -10,8 +10,7 @@ class Game:
     FPS = 60
     SCREEN_WIDTH, SCREEN_HEIGHT = 900, 900
 
-    BLOCK_SIZE = SCREEN_WIDTH // self.n  # Set the size of the grid block (in pixels)
-
+    EMPTY_CELL = 0
 
 class Colors:
     BLACK = (0, 0, 0)
