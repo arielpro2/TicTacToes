@@ -25,12 +25,12 @@ class TCPGameServer(socketserver.BaseRequestHandler):
     """
 
     def __init__(self, request, client_address, server):
+        logging.info(f"client {request.getpeername()[0]} connected")
         self.player_id = str(uuid.uuid4())
         request.send(self._serialize_data({'player_id': self.player_id}))
         CLIENTS[self.player_id] = request
 
         super().__init__(request, client_address, server)
-        logging.info(f"client {request.getpeername()[0]} connected")
 
     @staticmethod
     def _serialize_data(data: dict) -> bytes:
@@ -55,8 +55,8 @@ class TCPGameServer(socketserver.BaseRequestHandler):
     def _process_request(self, data: Dict):
         action = data.pop('action', None)
         clients_to_send = []
-        if action in GAME_CALLBACKS and 'player_id' in data and data['player_id'] in CLIENTS:
-            response, clients_to_send = GAME_CALLBACKS[action](**data)
+        if f"__{action}" in GAME_CALLBACKS and 'player_id' in data and data['player_id'] in CLIENTS:
+            response, clients_to_send = GAME_CALLBACKS[f"__{action}"](**data)
             response['action'] = action
         else:
             data['action'] = action
