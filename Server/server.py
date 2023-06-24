@@ -74,7 +74,7 @@ if __name__ == "__main__":
     HOST, PORT = input("Enter ip address:"), int(input("Enter port:"))
 
     # Create the server, binding to host and port
-    with socketserver.TCPServer((HOST, PORT), TCPGameServer) as server:
+    with socketserver.ThreadingTCPServer((HOST, PORT), TCPGameServer) as server:
         # Activate the server; this will keep running until you
         # interrupt the program with Ctrl-C
         server.serve_forever()
