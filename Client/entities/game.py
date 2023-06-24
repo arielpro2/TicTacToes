@@ -20,7 +20,7 @@ class Game:
         """
         Main Thread of the game, start running when the game first run. please implement
         """
-        raise NotImplementedError()
+        pass
 
     def _start_loop(self) -> None:
         """
@@ -36,4 +36,4 @@ class Game:
         """
         Main game loop, running in a loop after the game first run. please implement
         """
-        raise NotImplementedError()
+        pass
