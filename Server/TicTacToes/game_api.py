@@ -1,4 +1,5 @@
 import enum
+import inspect
 import random
 import time
 from functools import wraps
@@ -45,7 +46,8 @@ def generate_response(_room_id: str, _player_id: str, _status: Status, additiona
 def check_input(func: Callable):
     @wraps(func)
     def wrapper(**kwargs):
-        if set(kwargs.values()) != func.__code__.co_varnames:
+        if set(kwargs.keys()) != set(func.__code__.co_varnames[:func.__code__.co_argcount]):
+
             return generate_response(str(), str(), Status.invalid_arguments, kwargs)
         if 'room_id' in kwargs and kwargs['room_id'] not in GAMES:
             return generate_response(str(), str(), Status.room_not_found, kwargs)
