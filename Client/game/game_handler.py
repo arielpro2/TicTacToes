@@ -21,29 +21,24 @@ class TicTacToe(Game):
             (Const.Game.SCREEN_WIDTH, Const.Game.SCREEN_HEIGHT)
         )
         self.clock = pygame.time.Clock()
-        self.board = Board(10)
+        self.board = Board(Const.Game.SCREEN_SIZE)
         self.client = client
 
     def start_game(self) -> None:
         """
         running when the game first run
         """
-        # Initializing Game UI
         UI.init()
 
     def loop(self) -> str:
         """
         The game loop: running in a loop when the game is running
         """
-        # Handle Events
         err = GameEvents.handle(self.board, self.client)
 
-        # if returned err is TERMINATE event
         if err == Const.Events.TERMINATE:
             return Const.Events.TERMINATE
 
-        # Draw screen
         UI.update(self.screen, self.board)
 
-        # Update clock
         self.clock.tick(Const.Game.FPS)
