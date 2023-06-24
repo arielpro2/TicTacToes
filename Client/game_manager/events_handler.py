@@ -1,9 +1,9 @@
 import pygame
 
-from Client.game.board import Board
-from Client.game.ui_handler import UI
+from Client.GUI.board import Board
+from Client.GUI.ui_handler import UI
 from Client.networking.client import Client
-from Client.game import config as Const
+from Client.game_manager import config as Const
 
 
 class GameEvents:

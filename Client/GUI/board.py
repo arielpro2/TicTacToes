@@ -1,4 +1,4 @@
-from Client.game import config as Const
+from Client.game_manager import config as Const
 
 import pygame
 

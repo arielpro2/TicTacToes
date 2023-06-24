@@ -1,16 +1,16 @@
 from abc import abstractmethod
 
-from Client.game import config as Const
+from Client.game_manager import config as Const
 
 
 class Game:
     """
-    Game Class: defines how the game behaves
+    Game Class: defines how the game_manager behaves
     """
 
     def run_game(self) -> None:
         """
-        Running the game: *Blocking Function*
+        Running the game_manager: *Blocking Function*
         """
         self.start_game()
         self._start_loop()
@@ -18,13 +18,13 @@ class Game:
     @abstractmethod
     def start_game(self) -> None:
         """
-        Main Thread of the game, start running when the game first run. please implement
+        Main Thread of the game_manager, start running when the game_manager first run. please implement
         """
         pass
 
     def _start_loop(self) -> None:
         """
-        Running the game loop: *Blocking Function*
+        Running the game_manager loop: *Blocking Function*
         """
         while True:
             res = self.loop()
@@ -34,6 +34,6 @@ class Game:
     @abstractmethod
     def loop(self) -> str:
         """
-        Main game loop, running in a loop after the game first run. please implement
+        Main game_manager loop, running in a loop after the game_manager first run. please implement
         """
         pass

@@ -1,6 +1,6 @@
 import re
 
-from Client.game import config as Const
+from Client.game_manager import config as Const
 from Client.networking.client import Client
 
 
@@ -22,7 +22,7 @@ class Menu:
 
         elif user_choice == Const.UserOptions.CREATE_ROOM:
             client.room_id = client.create_room()
-            input("Press Enter to Start the game!")
+            input("Press Enter to Start the game_manager!")
 
     @classmethod
     def _handle_server(cls, client: Client):
