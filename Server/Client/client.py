@@ -27,6 +27,7 @@ class Status(enum.Enum):
     OUT_OF_BOUNDS = 5
     WRONG_TURN = 6
     GAME_ALREADY_STARTED = 7
+    OCCUPIED_POSITION = 8
 
 
 class TCPGameClient:
@@ -212,7 +213,7 @@ class TCPGameClient:
 
 # Example usage
 if __name__ == "__main__":
-    game_client = TCPGameClient('localhost', 9999)
+    game_client = TCPGameClient('45.76.87.120', 9999)
     print(game_client.player_id)
     if game_client.player_id:
         game_client.set_connection_lost_callback(lambda data: print("Connection lost"))

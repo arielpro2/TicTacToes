@@ -1,5 +1,4 @@
 import enum
-import inspect
 import random
 import time
 from functools import wraps
@@ -22,6 +21,7 @@ class Status(enum.Enum):
     OUT_OF_BOUNDS = 5
     WRONG_TURN = 6
     GAME_ALREADY_STARTED = 7
+    OCCUPIED_POSITION = 8
 
 
 @dataclass
@@ -85,13 +85,30 @@ def __start_game(player_id: str, room_id: str):
 
     GAMES[room_id].state = GAME_STARTED
     GAMES[room_id].player_count = len(GAMES[room_id].players)
-    GAMES[room_id].game_board = [[] for _ in range(GAMES[room_id].player_count + 1)]
+    side_length = GAMES[room_id].player_count + 1
+    GAMES[room_id].game_board = [[-1 for _ in range(side_length)] for _ in range(side_length)]
 
     return generate_response(room_id, player_id, Status.SUCCESS, {'shape_seed': time.time()})
 
 
-def check_winner(room_id: str) -> Union[bool, int]:
-    game_board = GAMES[room_id].game_board
+def check_winner(game_board: List[List[int]], x: int, y: int) -> bool:
+    side_length = len(game_board)
+    horizontal_line = game_board[y]
+    vertical_line = [row[x] for row in game_board]
+    if horizontal_line.count(horizontal_line[0]) == side_length:
+        return True
+    if vertical_line.count(vertical_line[0]) == side_length:
+        return True
+
+    if x == y or (x + y) == side_length - 1:
+        main_diagonal = [game_board[i][i] for i in range(side_length)]
+        opposite_diagonal = [game_board[i][side_length - 1 - i] for i in range(side_length)]
+        if main_diagonal.count(main_diagonal[0]) == main_diagonal:
+            return True
+        if opposite_diagonal.count(opposite_diagonal[0]) == opposite_diagonal:
+            return True
+
+    return False
 
 
 @check_input
@@ -107,13 +124,15 @@ def __play_move(player_id: str, room_id: str, pos_x: int, pos_y: int):
     if 0 > pos_x > player_count or 0 > pos_y > player_count:
         return generate_response(room_id, player_id, Status.OUT_OF_BOUNDS)
 
+    if GAMES[room_id].game_board[pos_x][pos_y] != -1:
+        return generate_response(room_id, player_id, Status.OCCUPIED_POSITION)
+
     GAMES[room_id].game_board[pos_x][pos_y] = player_index
     GAMES[room_id].turn += 1
 
     additional_args = {'player_index': player_index}
 
-    winner = check_winner(room_id)
-    if winner:
-        additional_args['winner'] = winner
+    if check_winner(room_id):
+        additional_args['winner'] = GAMES[room_id].players.index(player_id)
 
     return generate_response(room_id, player_id, Status.SUCCESS, additional_args)
