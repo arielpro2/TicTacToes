@@ -133,6 +133,7 @@ def __play_move(player_id: str, room_id: str, pos_x: int, pos_y: int):
     additional_args = {'player_index': player_index}
 
     if check_winner(room_id):
+        GAMES[room_id].state = GAME_ENDED
         additional_args['winner'] = GAMES[room_id].players.index(player_id)
 
     return generate_response(room_id, player_id, Status.SUCCESS, additional_args)

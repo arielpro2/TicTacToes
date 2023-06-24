@@ -1,4 +1,5 @@
 import json
+import socket
 import socketserver
 import uuid
 from json import JSONDecodeError
@@ -11,7 +12,7 @@ from TicTacToes import GAME_CALLBACKS
 
 coloredlogs.install()
 
-PACKET_SIZE = 512
+PACKET_LENGTH_SIZE = 4
 CLIENTS = {}
 
 
@@ -27,29 +28,30 @@ class TCPGameServer(socketserver.BaseRequestHandler):
     def __init__(self, request, client_address, server):
         logging.info(f"client {request.getpeername()[0]} connected")
         self.player_id = str(uuid.uuid4())
-        request.send(self._serialize_data({'player_id': self.player_id}))
+        self._send_packet({'player_id': self.player_id}, request)
         CLIENTS[self.player_id] = request
 
         super().__init__(request, client_address, server)
 
     @staticmethod
-    def _serialize_data(data: dict) -> bytes:
-        return json.dumps(data).encode().ljust(PACKET_SIZE, b'\0')
+    def _send_packet(data: dict, client: socket.socket):
+        data = json.dumps(data).encode()
+        client.send(len(data).to_bytes(PACKET_LENGTH_SIZE, byteorder='little'))
+        client.send(data)
+
+    @staticmethod
+    def _recv_packet(client: socket.socket) -> dict:
+        packet_length = client.recv(PACKET_LENGTH_SIZE)
+        if not packet_length:
+            return {}
+        data = client.recv(int.from_bytes(packet_length, byteorder='little'))
+        if not data:
+            return {}
+        return json.loads(data.decode().strip())
 
     def handle(self):
         while True:
-            data = self.request.recv(PACKET_SIZE)
-            if not data:
-                return
-
-            data = data[:data.index(b'\0')].decode().strip()
-
-            try:
-                parsed_data = json.loads(data)
-            except JSONDecodeError:
-                logging.warning("Client sent a bad packet")
-                continue
-
+            parsed_data = self._recv_packet(self.request)
             self._process_request(parsed_data)
 
     def _process_request(self, data: Dict):
@@ -63,11 +65,10 @@ class TCPGameServer(socketserver.BaseRequestHandler):
             response = data
             response['status'] = 'invalid_request'
 
-        response_bytes = self._serialize_data(response)
-        self.request.send(response_bytes)
+        self._send_packet(response, self.request)
         for client in clients_to_send:
             if client in CLIENTS:
-                CLIENTS[client].send(response_bytes)
+                self._send_packet(response, CLIENTS[client])
 
 
 if __name__ == "__main__":

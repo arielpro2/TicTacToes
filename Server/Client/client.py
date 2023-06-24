@@ -3,11 +3,10 @@ import enum
 import json
 import logging
 import socket
-import threading
 from threading import Thread
 from typing import Callable
 
-PACKET_SIZE = 512
+PACKET_LENGTH_SIZE = 4
 CONNECTION_TRIES = 5
 
 
@@ -56,19 +55,23 @@ class TCPGameClient:
         self._worker_count = worker_count
 
     @staticmethod
-    def _deserialize_data(data: bytes) -> dict:
-        return json.loads(data[:data.index(b'\0')].decode())
+    def _send_packet(data: dict, client: socket.socket):
+        data = json.dumps(data).encode()
+        client.send(len(data).to_bytes(PACKET_LENGTH_SIZE, byteorder='little'))
+        client.send(data)
 
     @staticmethod
-    def _serialize_data(data: dict) -> bytes:
-        return json.dumps(data).encode().ljust(PACKET_SIZE, b'\0')
-
-    def _next_network_event(self) -> dict:
-        response = self._server.recv(PACKET_SIZE)
-        return self._deserialize_data(response)
+    def _recv_packet(client: socket.socket) -> dict:
+        packet_length = client.recv(PACKET_LENGTH_SIZE)
+        if not packet_length:
+            return {}
+        data = client.recv(int.from_bytes(packet_length, byteorder='little'))
+        if not data:
+            return {}
+        return json.loads(data.decode().strip())
 
     def _fetch_player_id(self):
-        pid_data = self._next_network_event()
+        pid_data = self._recv_packet(self._server)
         return pid_data['player_id']
 
     async def _event_worker(self, queue: asyncio.Queue):
@@ -81,7 +84,7 @@ class TCPGameClient:
         while True:
             network_event_data = None
             try:
-                network_event_data = self._next_network_event()
+                network_event_data = self._recv_packet(self._server)
             except socket.error:
                 queue.put_nowait((GameEvent.CONNECTION_LOST, {}))
             if network_event_data:
@@ -145,9 +148,8 @@ class TCPGameClient:
         Attempts to create a new room.
         returns True if successful else False.
         """
-        self._server.send(self._serialize_data({'action': 'create_room',
-                                                'player_id': self.player_id}))
-        response = self._next_network_event()
+        self._send_packet({'action': 'create_room', 'player_id': self.player_id}, self._server)
+        response = self._recv_packet(self._server)
         print(response)
         if 'status' in response and response['status'] == Status.SUCCESS.value:
             self.room_id = response['room_id']
@@ -163,10 +165,10 @@ class TCPGameClient:
         Attempts to join a room.
         returns True if successful else False.
         """
-        self._server.send(self._serialize_data({'action': 'join_room',
-                                                'player_id': self.player_id,
-                                                'room_id': room_id}))
-        response = self._next_network_event()
+        self._send_packet({'action': 'join_room',
+                           'player_id': self.player_id,
+                           'room_id': room_id}, self._server)
+        response = self._recv_packet(self._server)
         if 'status' in response and response['status'] == Status.SUCCESS.value:
             self.room_id = response['room_id']
             self.player_index = response['player_index']
@@ -183,11 +185,10 @@ class TCPGameClient:
         Attempts to play a move.
         returns True if successful else False.
         """
-        self._server.send(
-            self._serialize_data({'action': 'start_game',
-                                  'player_id': self.player_id,
-                                  'room_id': self.room_id}))
-        response = self._next_network_event()
+        self._send_packet({'action': 'start_game',
+                           'player_id': self.player_id,
+                           'room_id': self.room_id}, self._server)
+        response = self._recv_packet(self._server)
         if 'status' in response and response['status'] == Status.SUCCESS.value:
             return True
 
@@ -198,13 +199,12 @@ class TCPGameClient:
         Attempts to play a move.
         returns True if successful else False.
         """
-        self._server.send(
-            self._serialize_data({'action': 'play_move',
-                                  'player_id': self.player_id,
-                                  'room_id': self.room_id,
-                                  'pos_x': x,
-                                  'pos_y': y}))
-        response = self._next_network_event()
+        self._send_packet({'action': 'play_move',
+                           'player_id': self.player_id,
+                           'room_id': self.room_id,
+                           'pos_x': x,
+                           'pos_y': y}, self._server)
+        response = self._recv_packet(self._server)
         if 'status' in response and response['status'] == Status.SUCCESS.value:
             return True
 
@@ -213,7 +213,7 @@ class TCPGameClient:
 
 # Example usage
 if __name__ == "__main__":
-    game_client = TCPGameClient('45.76.87.120', 9999)
+    game_client = TCPGameClient('localhost', 9999)
     print(game_client.player_id)
     if game_client.player_id:
         game_client.set_connection_lost_callback(lambda data: print("Connection lost"))
@@ -222,3 +222,5 @@ if __name__ == "__main__":
         game_client.set_player_joined_callback(lambda data: print(f"Player joined {data}"))
         print(game_client.create_room())
         print(f"room id: {game_client.room_id}")
+        while True:
+            game_client._send_packet(json.loads(input()))
