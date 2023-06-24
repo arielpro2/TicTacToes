@@ -1,13 +1,27 @@
 """
 TicTacToes game entry point module: here we create a new TicTacToe Game and call it
 """
-
+from Client.networking.client import Client
 from Client.game.game_handler import TicTacToe
+from Client.game.menu import Menu
 
 
 def main() -> None:
-    game = TicTacToe()
-    game.run_game()
+    # Creating client
+    client = Client()
+
+    # Connect to server
+    client.connect_to_server()
+
+    while True:
+        # handle Menu for connecting to room
+        Menu.handle(client)
+
+        # Creating game
+        game = TicTacToe(client)
+
+        # Running game
+        game.run_game()
 
 
 if __name__ == '__main__':

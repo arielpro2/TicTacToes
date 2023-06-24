@@ -22,3 +22,7 @@ class Colors:
 
     CELL_BORDER_COLOR: tuple = WHITE
     BACKGROUND_COLOR: tuple = BLACK
+
+
+class Events:
+    TERMINATE: str = "terminate"
