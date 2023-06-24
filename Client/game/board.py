@@ -37,7 +37,7 @@ class Board:
                     continue
                 self.draw_character(cell, y, x)
 
-    def draw_character(self, cell, y, x) -> None:
-        image = self.characters[cell]
+    def draw_character(self, cell: int, y: int, x: int) -> None:
+        image: list = self.characters[cell]
         # TODO: implement
         pass
