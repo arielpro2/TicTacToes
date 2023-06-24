@@ -1,5 +1,3 @@
-
-
 class Client:
     def __init__(self) -> None:
         client_id: str = self.connect_to_server()

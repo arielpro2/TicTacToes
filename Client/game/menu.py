@@ -18,7 +18,10 @@ class Menu:
     @staticmethod
     def _menu_choice() -> str:
         user_choice = ""
-        while user_choice not in [Const.UserOptions.JOIN_ROOM, Const.UserOptions.CREATE_ROOM]:
+        while user_choice not in [
+            Const.UserOptions.JOIN_ROOM,
+            Const.UserOptions.CREATE_ROOM,
+        ]:
             user_choice = input(
                 f"Join room ({Const.UserOptions.JOIN_ROOM}) or Create room ({Const.UserOptions.CREATE_ROOM}): "
             ).upper()

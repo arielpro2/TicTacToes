@@ -4,8 +4,8 @@ class Request:
 
 
 class UserOptions:
-    JOIN_ROOM: chr = 'J'
-    CREATE_ROOM: chr = 'C'
+    JOIN_ROOM: chr = "J"
+    CREATE_ROOM: chr = "C"
 
 
 class Game:

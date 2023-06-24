@@ -21,7 +21,5 @@ class UI:
     @staticmethod
     def pil_image_to_surface(pil_image) -> pygame.image:
         return pygame.image.fromstring(
-            pil_image.tobytes(),
-            pil_image.size,
-            pil_image.mode
+            pil_image.tobytes(), pil_image.size, pil_image.mode
         ).convert()

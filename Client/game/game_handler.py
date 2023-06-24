@@ -12,11 +12,14 @@ class TicTacToe(Game):
     """
     TicTacToe class: definition of TicTacToe game
     """
+
     def __init__(self, client: Client) -> None:
         """
         Initializer for game, here we init the Screen, Clock and Board
         """
-        self.screen = pygame.display.set_mode((Const.Game.SCREEN_WIDTH, Const.Game.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode(
+            (Const.Game.SCREEN_WIDTH, Const.Game.SCREEN_HEIGHT)
+        )
         self.clock = pygame.time.Clock()
         self.board = Board(10)
         self.client = client

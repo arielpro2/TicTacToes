@@ -2,6 +2,7 @@ from abc import abstractmethod
 
 from Client.game import config as Const
 
+
 class Game:
     """
     Game Class: defines how the game behaves
