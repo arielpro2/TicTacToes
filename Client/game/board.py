@@ -4,13 +4,13 @@ import pygame
 
 
 class Board:
-    def __init__(self, n) -> None:
-        self.n = n
-        self.board = [[Const.Game.EMPTY_CELL for _ in range(n)] for _ in range(n)]
+    def __init__(self, board_size: int) -> None:
+        self.board_size = board_size
+        self.board = [[Const.Game.EMPTY_CELL]*board_size]*board_size
         self.characters = []
 
         self.block_size = (
-            Const.Game.SCREEN_WIDTH // self.n
+            Const.Game.SCREEN_WIDTH // self.board_size
         )  # Set the size of the grid block (in pixels)
 
     def draw_grid(self, screen) -> None:
