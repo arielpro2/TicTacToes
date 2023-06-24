@@ -1,7 +1,8 @@
 class Client:
     def __init__(self) -> None:
-        client_id: str = self.connect_to_server()
+        client_id: str = ""
         room_id: str = ""
+        server_ip: str = ""
 
     def send_place_cell(self, position: (int, int)) -> None:
         x, y = position

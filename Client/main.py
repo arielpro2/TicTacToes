@@ -10,9 +10,6 @@ def main() -> None:
     # Creating client
     client = Client()
 
-    # Connect to server
-    client.connect_to_server()
-
     while True:
         # handle Menu for connecting to room
         Menu.handle(client)
